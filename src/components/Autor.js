@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import api from '../services/api';
 import InputCustomizado from './inputCustomizado';
-import $ from 'jquery';
 import PubSub from 'pubsub-js';
 
 import TratadorErros from  '../Models/TratadorErros';
@@ -30,43 +29,21 @@ class FormularioAutor extends Component {
 
   enviaForm =  async (e)=>{
     e.preventDefault();
-   
-  /*   let data = {
-      nome: this.state.nome,
-      email: this.state.email,
-      id:2
-    };
-    this.setState(state => ({ 
-      lista: state.lista.concat(data),
-      nome: '',
-      email: '',
-      senha: ''
-    })); */
 
-    /*  const response = await api.post('autores',
-     JSON.stringify({nome:this.state.nome,email:this.state.email,senha:this.state.senha}))
-    console.log(response);  */
+    PubSub.publish("limpa-erros",{});
 
-    $.ajax({
-      url:'http://localhost:8080/api/autores',
-      contentType:'application/json',
-      dataType:'json',
-      type:'post',
-      data: JSON.stringify({nome:this.state.nome,email:this.state.email,senha:this.state.senha}),
-      success: novaListagem => {
-        PubSub.publish('atualiza-lista-autores',novaListagem);        
-        this.setState({nome:'',email:'',senha:''});       
-      },
-      error: erro => {
-        console.log(erro.responseJSON.status);
-        if(erro.status === 400) {
-          new TratadorErros().publicaErros(erro.responseJSON);
-        }
-      }  ,
-      beforeSend: function(){
-        PubSub.publish("limpa-erros",{});
-      }     
-    });
+    try{
+      const response = await api.post('autores',
+      JSON.stringify({nome:this.state.nome,email:this.state.email,senha:this.state.senha}));
+       console.log(response); 
+    
+       PubSub.publish('atualiza-lista-autores',response.data);        
+         this.setState({nome:'',email:'',senha:''}); 
+     
+    }catch(error){
+      console.log(error.response.data)
+      new TratadorErros().publicaErros(error.response.data);
+    }
 
   }
 

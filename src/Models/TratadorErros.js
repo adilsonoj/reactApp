@@ -6,6 +6,6 @@ export default class TratadorErros {
             let erro = erros.errors[i];
             PubSub.publish("erro-validacao",erro);
         }
-        
+
     }
 }
